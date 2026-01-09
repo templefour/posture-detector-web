@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>坐姿检测器 - 保护视力，养成好习惯</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="assets/icons/icon-192.png">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-child"></i>
+                <span>坐姿检测器</span>
+            </div>
+            <div class="nav-menu">
+                <button id="homeBtn" class="nav-btn active"><i class="fas fa-home"></i> 主页</button>
+                <button id="reportBtn" class="nav-btn"><i class="fas fa-chart-bar"></i> 报告</button>
+                <button id="settingsBtn" class="nav-btn"><i class="fas fa-cog"></i> 设置</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 主页 -->
+        <section id="homePage" class="page active">
+            <div class="camera-container">
+                <div class="video-wrapper">
+                    <video id="cameraVideo" autoplay playsinline></video>
+                    <canvas id="poseCanvas"></canvas>
+                    <div class="camera-overlay">
+                        <div class="status-indicator" id="statusIndicator">
+                            <div class="status-circle"></div>
+                            <span class="status-text">准备就绪</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button id="startBtn" class="btn btn-primary">
+                        <i class="fas fa-play"></i> 开始检测
+                    </button>
+                    <button id="pauseBtn" class="btn btn-secondary" disabled>
+                        <i class="fas fa-pause"></i> 暂停
+                    </button>
+                    <button id="calibrateBtn" class="btn btn-info">
+                        <i class="fas fa-ruler"></i> 校准姿势
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="studyTime">00:00</div>
+                        <div class="stat-label">学习时间</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="goodRatio">0%</div>
+                        <div class="stat-label">良好率</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="alertCount">0</div>
+                        <div class="stat-label">提醒次数</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="continuousTime">0</div>
+                        <div class="stat-label">连续良好(分)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="posture-info">
+                <div class="info-card">
+                    <h3><i class="fas fa-info-circle"></i> 坐姿状态</h3>
+                    <div id="postureStatus" class="posture-status good">
+                        <i class="fas fa-check"></i> 坐姿良好
+                    </div>
+                    <div id="issuesList" class="issues-list"></div>
+                </div>
+                
+                <div class="info-card">
+                    <h3><i class="fas fa-history"></i> 今日趋势</h3>
+                    <canvas id="todayChart" class="mini-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- 报告页面 -->
+        <section id="reportPage" class="page">
+            <div class="report-header">
+                <h2><i class="fas fa-chart-bar"></i> 数据分析报告</h2>
+                <div class="report-actions">
+                    <button id="exportBtn" class="btn btn-outline">
+                        <i class="fas fa-download"></i> 导出数据
+                    </button>
+                </div>
+            </div>
+            
+            <div class="report-tabs">
+                <button class="tab-btn active" data-tab="daily">日报</button>
+                <button class="tab-btn" data-tab="weekly">周报</button>
+                <button class="tab-btn" data-tab="charts">图表</button>
+                <button class="tab-btn" data-tab="achievements">成就</button>
+            </div>
+            
+            <div class="tab-content">
+                <div id="dailyTab" class="tab-pane active">
+                    <div class="report-card">
+                        <h3>今日报告</h3>
+                        <div id="dailyReport" class="report-content">
+                            加载中...
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="weeklyTab" class="tab-pane">
+                    <div class="report-card">
+                        <h3>本周报告</h3>
+                        <div id="weeklyReport" class="report-content">
+                            加载中...
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="chartsTab" class="tab-pane">
+                    <div class="chart-container">
+                        <div class="chart-card">
+                            <h4>坐姿良好率趋势</h4>
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h4>今日坐姿比例</h4>
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h4>时段分析</h4>
+                            <canvas id="hourlyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="achievementsTab" class="tab-pane">
+                    <div class="achievements-container">
+                        <h3>成就系统</h3>
+                        <div id="achievementsList" class="achievements-list">
+                            加载中...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 设置页面 -->
+        <section id="settingsPage" class="page">
+            <div class="settings-header">
+                <h2><i class="fas fa-cog"></i> 设置</h2>
+            </div>
+            
+            <div class="settings-container">
+                <div class="settings-card">
+                    <h3><i class="fas fa-clock"></i> 时间设置</h3>
+                    <div class="setting-item">
+                        <label for="studyDuration">学习时长 (分钟)</label>
+                        <input type="number" id="studyDuration" min="5" max="60" value="25">
+                    </div>
+                    <div class="setting-item">
+                        <label for="breakDuration">休息时长 (分钟)</label>
+                        <input type="number" id="breakDuration" min="1" max="15" value="5">
+                    </div>
+                </div>
+                
+                <div class="settings-card">
+                    <h3><i class="fas fa-volume-up"></i> 声音设置</h3>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="soundEnabled" checked>
+                            启用声音提醒
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label for="alertFrequency">提醒频率 (秒)</label>
+                        <input type="number" id="alertFrequency" min="5" max="60" value="10">
+                    </div>
+                </div>
+                
+                <div class="settings-card">
+                    <h3><i class="fas fa-camera"></i> 摄像头设置</h3>
+                    <div class="setting-item">
+                        <label for="cameraSelect">选择摄像头</label>
+                        <select id="cameraSelect">
+                            <option value="">自动选择</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="flipCamera" checked>
+                            镜像显示
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="settings-card">
+                    <h3><i class="fas fa-database"></i> 数据管理</h3>
+                    <div class="setting-item">
+                        <button id="clearDataBtn" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> 清除所有数据
+                        </button>
+                    </div>
+                    <div class="setting-item">
+                        <button id="exportAllBtn" class="btn btn-outline">
+                            <i class="fas fa-file-export"></i> 导出所有数据
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="settings-actions">
+                    <button id="saveSettingsBtn" class="btn btn-primary">
+                        <i class="fas fa-save"></i> 保存设置
+                    </button>
+                    <button id="resetSettingsBtn" class="btn btn-secondary">
+                        <i class="fas fa-undo"></i> 恢复默认
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 音效 -->
+    <audio id="alertSound" preload="auto">
+        <source src="assets/sounds/alert.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="goodSound" preload="auto">
+        <source src="assets/sounds/good.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="achievementSound" preload="auto">
+        <source src="assets/sounds/achievement.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- 脚本 -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="mediapipe-utils.js"></script>
+    <script src="data.js"></script>
+    <script src="chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
